@@ -1,0 +1,105 @@
+instructions = """
+This will be our tic tac toe board
+
+1 | 2 | 3
+---|---|---
+4 | 5 | 6
+---|---|---
+7 | 8 | 9
+
+* Instructions:
+1. Insert the spot numbers (1-9) to put your sign.
+2. You must fill all 9 spots to get a result.
+3. Player 1 will go first.
+"""
+
+# Initialize the board
+sign_dictionary = [' ' for _ in range(9)]
+
+# Function to print the board
+def print_board(sign_dictionary):
+    board = f"""
+    {sign_dictionary[0]} | {sign_dictionary[1]} | {sign_dictionary[2]}
+    ---|---|---
+    {sign_dictionary[3]} | {sign_dictionary[4]} | {sign_dictionary[5]}
+    ---|---|---
+    {sign_dictionary[6]} | {sign_dictionary[7]} | {sign_dictionary[8]}
+    """
+    print(board)
+
+index_list = []
+
+# Function to take input from a player
+def take_input(player_name):
+    while True:
+        try:
+            x = int(input(f"{player_name}: ")) - 1
+            if 0 <= x < 9:
+                if x in index_list:
+                    print("This spot is already taken.")
+                    continue
+                index_list.append(x)
+                return x
+            else:
+                print("Please enter a number between 1 and 9.")
+        except ValueError:
+            print("Invalid input. Please enter a valid number between 1 and 9.")
+
+# Function to calculate and check the game result
+def calculate_result(sign_dictionary, player_one, player_two):
+    winning_combinations = [
+        (0, 1, 2), (3, 4, 5), (6, 7, 8),  # Rows
+        (0, 3, 6), (1, 4, 7), (2, 5, 8),  # Columns
+        (0, 4, 8), (2, 4, 6)              # Diagonals
+    ]
+    for combo in winning_combinations:
+        if all(sign_dictionary[i] == 'X' for i in combo):
+            print(f"Congratulations {player_one}! You won!")
+            quit("Thank you both for joining.")
+        elif all(sign_dictionary[i] == '0' for i in combo):
+            print(f"Congratulations {player_two}! You won!")
+            play = input("Do you want to play again? Type 'yes' or 'no': ")
+            if play.lower() == 'yes':
+                main()
+            else:
+                quit("Thank you both for joining.")
+    return
+
+# Main game function
+def main():
+    print("Welcome to the Tic Tac Toe game!")
+    player_one = input("Enter Player One's name: ")
+    player_two = input("Enter Player Two's name: ")
+    print(f"Thank you for joining, {player_one} and {player_two}.")
+
+    print(instructions)
+    print(f"{player_one}'s sign will be - X")
+    print(f"{player_two}'s sign will be - 0")
+    input("Press Enter to start the game...")
+
+    # Reset variables
+    global sign_dictionary, index_list
+    sign_dictionary = [' ' for _ in range(9)]
+    index_list = []
+
+    print_board(sign_dictionary)
+
+    for i in range(9):
+        if i % 2 == 0:
+            index = take_input(player_one)
+            sign_dictionary[index] = 'X'
+        else:
+            index = take_input(player_two)
+            sign_dictionary[index] = '0'
+
+        print_board(sign_dictionary)
+        calculate_result(sign_dictionary, player_one, player_two)
+
+    print("It's a tie! Nobody won. Play again?")
+    play = input("Do you want to play again? Type 'yes' or 'no': ")
+    if play.lower() == 'yes':
+        main()
+    else:
+        quit("Thank you!")
+
+main()
