@@ -1,0 +1,66 @@
+class ForwardChaining:
+    def __init__(self, facts, rules):
+        self.facts = set(facts)
+        self.rules = rules
+        self.inferred = set()
+
+    def apply_rule(self, rule):
+        premises, conclusion = rule
+        if all(premise in self.facts for premise in premises) and conclusion not in self.facts:
+            self.facts.add(conclusion)
+            self.inferred.add(conclusion)
+            return True
+        return False
+
+    def forward_chain(self, query):
+        while True:
+            new_fact_inferred = False
+            for rule in self.rules:
+                if self.apply_rule(rule):
+                    new_fact_inferred = True
+                    if query in self.facts:
+                        return True  # Query proven
+
+            if not new_fact_inferred:
+                return False  # No more facts can be inferred
+
+# Example: Family relationships
+facts = [
+    "Parent(John, Mary)",
+    "Parent(Mary, Alice)"
+]
+
+rules = [
+    (["Parent(x, y)"], "Ancestor(x, y)"),
+    (["Parent(x, y)", "Ancestor(y, z)"], "Ancestor(x, z)")
+]
+
+# Function to map facts
+def ground_rule(rule, fact_bindings):
+    premises, conclusion = rule
+    grounded_premises = [p.format(**fact_bindings) for p in premises]
+    grounded_conclusion = conclusion.format(**fact_bindings)
+    return (grounded_premises, grounded_conclusion)
+
+
+# Actual fact map for grounding
+fact_bindings = {
+    "x": "John",
+    "y": "Mary",
+    "z": "Alice"
+}
+
+grounded_rules = [ground_rule(rule, fact_bindings) for rule in rules]
+
+# Define the query
+query = "Ancestor(John, Alice)"
+
+# Create a ForwardChaining object and check the query
+fc = ForwardChaining(facts, grounded_rules)
+result = fc.forward_chain(query)
+
+# Output the result
+if result:
+    print(f"The query '{query}' is proven.")
+else:
+    print(f"The query '{query}' could not be proven.")

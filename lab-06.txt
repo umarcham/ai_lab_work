@@ -1,0 +1,53 @@
+class Unifier:
+    def __init__(self):
+        self.substitution = {}
+
+    def unify(self, expr1, expr2):
+        """
+        Unify two expressions expr1 and expr2.
+        Returns a substitution dictionary or False if unification fails.
+        """
+        if expr1 == expr2:
+            return self.substitution  # They are identical; no change needed
+        
+        # If either expr1 or expr2 is a variable, unify by substituting
+        if isinstance(expr1, str) and expr1.islower():  # expr1 is a variable
+            return self._unify_variable(expr1, expr2)
+        if isinstance(expr2, str) and expr2.islower():  # expr2 is a variable
+            return self._unify_variable(expr2, expr1)
+        
+        # If both are compound terms (like lists or tuples), recursively unify their components
+        if isinstance(expr1, tuple) and isinstance(expr2, tuple) and len(expr1) == len(expr2):
+            for sub_expr1, sub_expr2 in zip(expr1, expr2):
+                result = self.unify(sub_expr1, sub_expr2)
+                if result is False:
+                    return False
+            return self.substitution
+        
+        # If no other conditions, they cannot be unified
+        return False
+    
+    def _unify_variable(self, var, expr):
+        """
+        Unify a variable with an expression, substituting the variable with the expression.
+        """
+        # If the variable already has a substitution, apply it
+        if var in self.substitution:
+            return self.unify(self.substitution[var], expr)
+        
+        # Avoid recursive substitution
+        if expr == var:
+            return self.substitution
+        
+        # Add the substitution to the dictionary
+        self.substitution[var] = expr
+        return self.substitution
+
+# Example usage
+unifier = Unifier()
+
+expr1 = ('f', 'X', 1)
+expr2 = ('f', 2, 1)
+
+result = unifier.unify(expr1, expr2)
+print(result)
